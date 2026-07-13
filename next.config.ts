@@ -1,0 +1,14 @@
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  devIndicators: false,
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "image.tmdb.org" },
+      { protocol: "https", hostname: "placehold.co" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+    ],
+  },
+};
+
+export default nextConfig;
