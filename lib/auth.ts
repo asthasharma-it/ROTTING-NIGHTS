@@ -42,6 +42,10 @@ providers.push(
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  // Auth.js only auto-trusts the host header on Vercel; without this,
+  // sign-in on any other host (Netlify included) fails with a generic
+  // "server configuration" error.
+  trustHost: true,
   providers,
   pages: {
     signIn: "/signin",
