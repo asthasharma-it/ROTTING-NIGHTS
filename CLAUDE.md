@@ -43,13 +43,15 @@ A personal, dark-themed movie & series tracker. Mood/genre browsing, a 5-way sta
 - App icon is `app/icon.svg` (Next.js auto-detects this convention) — a simple crescent-moon mark in the theme's accent purple, not an emoji. The default create-next-app favicon/boilerplate SVGs in `public/` were removed as dead weight.
 
 ## Deployment
-- Source hosted at github.com/asthasharma-it/ROTTING-NIGHTS (pushed from local; `.claude/settings.local.json` is gitignored since Claude Code command-permission history can embed API keys used in test commands).
-- Deploying to Netlify (`netlify.toml` configures `@netlify/plugin-nextjs`). Netlify env vars still need to be set from the dashboard: `DATABASE_URL`, `TMDB_API_KEY`, `AUTH_SECRET` (generate a real one, don't reuse the local placeholder), and later `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` once Google sign-in is configured.
+- **Live** at rotting-nights.netlify.app. Source at github.com/asthasharma-it/ROTTING-NIGHTS; Netlify auto-deploys on every push to `master` (site was created and connected via the Netlify UI, not by Claude — account/site creation isn't something Claude does on the user's behalf, but everything after that — env vars, debugging, redeploys — was done via the Netlify API using a user-supplied Personal Access Token).
+- `.claude/settings.local.json` is gitignored since Claude Code's command-permission history can embed API keys used in test commands (caught a real leak of the TMDB key this way before the first push — always check staged diffs for secrets before committing, not just the file list).
+- Two real bugs only surfaced once actually deployed, both fixed and verified live:
+  1. **Auth.js needs `trustHost: true`** (`lib/auth.ts`) for any host besides Vercel — without it, sign-in fails everywhere with a generic "server configuration" error that gives no hint it's a host-trust issue.
+  2. **Prisma Client was never generated on Netlify's build machine** — `node_modules` isn't committed (correct), so a fresh `npm install` on a new environment doesn't produce a Query Engine for our schema unless something explicitly runs `prisma generate`. Added `"postinstall": "prisma generate"` to `package.json`. This one masqueraded as the *same* Auth.js "server configuration" error as bug #1, so fixing `trustHost` alone looked done but wasn't — always re-verify against the live site after a fix, don't assume the first plausible cause was the only one.
+- Netlify env vars set: `DATABASE_URL`, `TMDB_API_KEY`, `AUTH_SECRET` (real generated value, not the local placeholder).
 
 ## Known open items
-- Google sign-in credentials not yet configured (Guest login works fully in the meantime, including separate accounts).
-- Netlify site not yet created — waiting on account signup (account creation isn't something Claude can do on the user's behalf).
-- `AUTH_SECRET` is a placeholder value locally; needs a real random secret in Netlify's env vars before going live (a local-only value is fine for `npm run dev`).
+- Google sign-in credentials not yet configured (Guest login works fully in the meantime, including separate accounts). Add `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` to Netlify's env vars once set up.
 
 ## Working agreement
 - Keep this file updated whenever a notable architectural decision, new feature, or open item changes — not just at major milestones. Small, frequent edits here over letting it drift.
