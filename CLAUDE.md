@@ -8,7 +8,7 @@ A personal, dark-themed movie & series tracker. Mood/genre browsing, a 5-way sta
 
 ## Stack
 - Next.js 16 (App Router) + TypeScript + Tailwind CSS v4
-- Prisma + SQLite locally (`prisma/schema.prisma`, `prisma/dev.db`) — production will need a hosted Postgres (SQLite doesn't persist on serverless hosts)
+- Prisma + hosted Postgres on Neon (`prisma/schema.prisma`) — swapped over from local SQLite for deployment since serverless hosts don't persist local files. Same schema, `db push` (no migration history) rather than `migrate` for now.
 - NextAuth v5 (`lib/auth.ts`) — Google OAuth when `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` are set, otherwise falls back to a "Continue as Guest" credentials provider so the app is always testable
 - TMDB API (`lib/tmdb.ts`) for all movie/show data, posters, cast, and watch-provider (streaming logo) info, region `IN`. Falls back to a small mock catalog (`lib/mock-data.ts`) when `TMDB_API_KEY` is unset.
 
@@ -42,10 +42,14 @@ A personal, dark-themed movie & series tracker. Mood/genre browsing, a 5-way sta
 - `RatingStars` and `PosterOverlay` support a compact `size="sm"` so you can rate a title (1-5★) directly from any poster grid, not just the detail page — since ratings are now the main signal behind the hero, because-you-liked rows, and tightened recommendations, lowering the friction to rate something matters more than before. A `ratings: Map<string, number>` (from `getRatingMap()`) is threaded through every poster-grid page (Home, Genre/Mood/Region, Search, My Lists, Coming Soon) the same way `statuses` already was, so the compact stars correctly show an existing rating instead of always starting empty.
 - App icon is `app/icon.svg` (Next.js auto-detects this convention) — a simple crescent-moon mark in the theme's accent purple, not an emoji. The default create-next-app favicon/boilerplate SVGs in `public/` were removed as dead weight.
 
+## Deployment
+- Source hosted at github.com/asthasharma-it/ROTTING-NIGHTS (pushed from local; `.claude/settings.local.json` is gitignored since Claude Code command-permission history can embed API keys used in test commands).
+- Deploying to Netlify (`netlify.toml` configures `@netlify/plugin-nextjs`). Netlify env vars still need to be set from the dashboard: `DATABASE_URL`, `TMDB_API_KEY`, `AUTH_SECRET` (generate a real one, don't reuse the local placeholder), and later `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` once Google sign-in is configured.
+
 ## Known open items
 - Google sign-in credentials not yet configured (Guest login works fully in the meantime, including separate accounts).
-- Not yet deployed — still local-only (`npm run dev`). Deploying will need a hosted Postgres (Neon) swapped in for `DATABASE_URL` and Prisma's schema provider changed from `sqlite` to `postgresql`.
-- `AUTH_SECRET` is a placeholder value locally; needs a real random secret before any public deployment.
+- Netlify site not yet created — waiting on account signup (account creation isn't something Claude can do on the user's behalf).
+- `AUTH_SECRET` is a placeholder value locally; needs a real random secret in Netlify's env vars before going live (a local-only value is fine for `npm run dev`).
 
 ## Working agreement
 - Keep this file updated whenever a notable architectural decision, new feature, or open item changes — not just at major milestones. Small, frequent edits here over letting it drift.
