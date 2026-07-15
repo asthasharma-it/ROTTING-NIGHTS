@@ -55,3 +55,7 @@ A personal, dark-themed movie & series tracker. Mood/genre browsing, a 5-way sta
 
 ## Working agreement
 - Keep this file updated whenever a notable architectural decision, new feature, or open item changes — not just at major milestones. Small, frequent edits here over letting it drift.
+
+## Project location
+- The actual project (this whole repo) lives in `C:\Users\astha\OneDrive\Desktop\SANDBOX\ROTTING NIGHTS`, moved here from the SANDBOX root at Krish's request to keep the folder organized. Git history, remote, and `.env` all moved with it and are unaffected — deployment is driven by the GitHub repo, not local file location, so this had no effect on the live site.
+- One exception: `C:\Users\astha\OneDrive\Desktop\SANDBOX\.claude\launch.json` still exists at the SANDBOX root (outside this project folder) as a thin shim so Claude's dev-server preview tool can find it — that tool always looks for `.claude/launch.json` at the fixed top-level working directory, not wherever the project itself lives, so this one file can't move without breaking `npm run dev` previews. It just points into `ROTTING NIGHTS/` and runs `next dev` there.
