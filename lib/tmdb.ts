@@ -88,6 +88,17 @@ interface RawResult {
   media_type?: string;
 }
 
+// TMDB's "trending" is based on page views/searches on TMDB itself, not
+// actual watch activity — a hyped unreleased title can easily out-rank
+// things people can actually watch right now. Anything with a future
+// release/air date doesn't belong in "Trending this week"; it belongs in
+// Coming Soon instead.
+function isReleased(raw: RawResult, mediaType: MediaType): boolean {
+  const dateStr = mediaType === "movie" ? raw.release_date : raw.first_air_date;
+  if (!dateStr) return true;
+  return dateStr <= new Date().toISOString().slice(0, 10);
+}
+
 function toSummary(raw: RawResult, mediaType: MediaType): MediaSummary {
   const title = (mediaType === "movie" ? raw.title : raw.name) ?? "Untitled";
   const dateStr = mediaType === "movie" ? raw.release_date : raw.first_air_date;
@@ -132,6 +143,7 @@ export async function getTrending(): Promise<MediaSummary[]> {
     const data = await tmdbFetch("/trending/all/week");
     return (data.results as RawResult[])
       .filter((r) => r.media_type === "movie" || r.media_type === "tv")
+      .filter((r) => isReleased(r, r.media_type as MediaType))
       .map((r) => toSummary(r, r.media_type as MediaType));
   } catch {
     return [];
